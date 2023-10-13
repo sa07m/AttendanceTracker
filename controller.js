@@ -3,20 +3,6 @@ const Sequelize = require('sequelize')
 const AttendanceModel = require('../models/studentModel')
 const DateModel = require('../models/dateModel')
 
-exports.addDate = (req, res, next) => {
-    console.log('in adddate controller')
-    const dateStr = req.body.date1
-   const date2 = new Date(dateStr)
-  // const jsonDate = date2.toJSON()
-    console.log(date2+'issue')
-    DateModel.create({
-        date: date2
-    })
-        .then((result) => console.log('date created'))
-        .catch(err => console.log(err))
-}
-
-
 exports.getAttendance = (req, res, next) => {
     const date1 = req.params.date1;
     const date = new Date(date1)
@@ -49,33 +35,6 @@ exports.getAttendance = (req, res, next) => {
         })
 }
 
-// exports.postAttendance = (req, res, next) => {
-//   console.log('in post controller');
-//     const name = req.body.name;
-//     const status = req.body.status;
-//     const date1 = req.body.date1;
-    
-//     const date= new Date(date1)
-    
-//     DateModel.findOne(date)
-//     .then(date => {
-//       if(date && typeof date.createAttendanceModel === 'function') {
-//       return date.createAttendanceModel({
-//         name:name,
-//         status:status
-//       })
-//     }
-//     else{
-//       throw new Error('createAttendanceModel method not found on date object');
-//     }
-//   })
-//     .then(result=>{
-//       console.log('created attendance')
-//       res.json(result)
-//     })
-//     .catch(err=>console.log(err))
-//   }
-  
 exports.postAttendance = (req, res, next) => {
   console.log('in post controller');
   const name = req.body.name;
@@ -108,4 +67,23 @@ exports.postAttendance = (req, res, next) => {
     console.log(err);
     res.status(500).json({ error: 'Server error' });
   });
+}
+
+exports.getReport = (req, res, next) => {
+  
+  AttendanceModel.findAll({
+    attributes: [
+      'name',
+      [sequelize.fn('SUM', sequelize.literal("CASE WHEN status = 'present' THEN 1 ELSE 0 END")), 'present_count'],
+      [sequelize.fn('SUM', sequelize.literal("CASE WHEN status = 'absent' THEN 1 ELSE 0 END")), 'absent_count'],
+    ],
+    group: ['name'],
+  })
+  .then(results => {
+    res.json(results);
+  })
+  .catch(err => {
+    console.error(err);
+  });
+  
 }

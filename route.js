@@ -4,5 +4,6 @@ const router = express.Router()
 
 router.post('/mark-attendance', controlAttendance.postAttendance)
 router.get('/get-attendance/:date1', controlAttendance.getAttendance)
-router.post('/add-date',controlAttendance.addDate)
+router.get('/get-report', controlAttendance.getReport)
+
 module.exports = router
