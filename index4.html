@@ -31,7 +31,7 @@
         <!-- This will be populated with student names and radio buttons -->
     </div>
 
-    <button id="mark-attendance">Mark Attendance</button>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
     <script>
         document.getElementById("search").addEventListener("click", funcSearch)
@@ -40,17 +40,10 @@
             const attendanceList = document.getElementById("attendance-list");
             attendanceList.innerHTML = '';
             const date1 = document.getElementById("date").value;
-            // const date = new Date(dateStr); // Create a Date object from the input date string
-            // const utc = date.toUTCString();
-            // console.log(utc + 'is utc');
-
+            
             const getData = await axios.get(`http://localhost:7000/get-attendance/${date1}`)
                 .then((result) => {
-                    //console.log(result.data)
-                    //return result.data
-
                     console.log('in axios get')
-                    //console.log(result.data + 'result of axios get')
                     if (result.data.length > 0) {
                         console.log('if length>0')
                         for (let i = 0; i < result.data.length; i++) {
@@ -64,8 +57,6 @@
                     }
                 })
                 .catch(err => console.log(err))
-
-
         }
         function disp() {
 
@@ -74,6 +65,10 @@
 
             const attendanceList = document.getElementById("attendance-list");
             attendanceList.innerHTML = '';
+            const markbtn = document.createElement('input')
+                markbtn.id='mark-attendance'
+                markbtn.type = 'button'
+                markbtn.value = 'Mark Attendance'
 
             studentNames.forEach(name => {
                 const studentDiv = document.createElement("div");
@@ -93,16 +88,19 @@
                 absentRadio.name = name;
                 absentRadio.value = "Absent";
 
-                console.log(absentRadio.value)
+               
 
                 studentDiv.appendChild(label);
                 studentDiv.appendChild(presentRadio);
                 studentDiv.appendChild(absentRadio);
                 attendanceList.appendChild(studentDiv);
             })
+            
+            attendanceList.appendChild(markbtn)
+            document.getElementById("mark-attendance").addEventListener("click", mark)
         }
 
-        document.getElementById("mark-attendance").addEventListener("click", mark)
+        
 
         async function mark() {
             const date1 = document.getElementById("date").value;
@@ -110,16 +108,11 @@
             const studentList = document.querySelectorAll(".student");
             const list = document.getElementById('attendance-list');
             list.innerHTML = '';
-            //const date1 = new Date(dateStr); // Create a Date object from the input date string
-            // const utc = date.toUTCString();
+    
             console.log(date1 + 'is utc1');
             const obj={
                 date1
             }
-
-            // const datedb=axios.post('http://localhost:7000/add-date', obj)
-            // .then(result=>console.log('date post'))
-            // .catch(err=>console.log(err))
 
             for(const student of studentList) {
                 const name = student.querySelector("label").textContent;
