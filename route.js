@@ -3,5 +3,6 @@ const controlAttendance = require('../controllers/controller')
 const router = express.Router()
 
 router.post('/mark-attendance', controlAttendance.postAttendance)
-
+router.get('/get-attendance/:date1', controlAttendance.getAttendance)
+router.post('/add-date',controlAttendance.addDate)
 module.exports = router
