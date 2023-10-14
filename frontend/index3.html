@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Attendance Tracker</title>
+    <style>
+        .student {
+            display: flex;
+            align-items: center;
+        }
+
+        .tick {
+            width: 20px;
+            height: 20px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+
+
+<body>
+    <h1>Attendance Tracker</h1>
+
+    <div>
+        <label for="date">Date:</label>
+        <input type="date" id="date">
+        <button id="search">Search</button>
+    </div>
+
+    <div id="attendance-list">
+        <!-- This will be populated with student names and radio buttons -->
+    </div>
+
+    <button id="mark-attendance">Mark Attendance</button>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.1/axios.min.js"></script>
+    <script>
+        document.getElementById("search").addEventListener("click", funcSearch)
+
+        async function funcSearch() {
+            const attendanceList = document.getElementById("attendance-list");
+            attendanceList.innerHTML = '';
+            const dateStr = document.getElementById("date").value;
+            const date = new Date(dateStr); // Create a Date object from the input date string
+            const utc = date.toUTCString();
+            console.log(utc + 'is utc');
+
+            const getData = await axios.get(`http://localhost:7000/get-attendance/${utc}`)
+                .then((result) => {
+                    //console.log(result.data)
+                    //return result.data
+
+                    console.log('in axios get')
+                    //console.log(result.data + 'result of axios get')
+                    if (result.data.length > 0) {
+                        console.log('if length>0')
+                        for (let i = 0; i < result.data.length; i++) {
+                            console.log(result.data[i].name)
+                            display(result.data[i])
+                        }
+                    }
+                    else {
+                        
+                        disp()
+                    }
+                })
+                .catch(err => console.log(err))
+
+
+        }
+        function disp() {
+
+            console.log('here we go again')
+            const studentNames = ["Alice", "Bob", "Cindy", "David"];
+
+            const attendanceList = document.getElementById("attendance-list");
+            attendanceList.innerHTML = '';
+
+            studentNames.forEach(name => {
+                const studentDiv = document.createElement("div");
+                studentDiv.id = 'sdid'
+                studentDiv.className = "student";
+
+                const label = document.createElement("label");
+                label.textContent = name;
+
+                const presentRadio = document.createElement("input");
+                presentRadio.type = "radio";
+                presentRadio.name = name;
+                presentRadio.value = "Present";
+
+                const absentRadio = document.createElement("input");
+                absentRadio.type = "radio";
+                absentRadio.name = name;
+                absentRadio.value = "Absent";
+
+                console.log(absentRadio.value)
+
+                studentDiv.appendChild(label);
+                studentDiv.appendChild(presentRadio);
+                studentDiv.appendChild(absentRadio);
+                attendanceList.appendChild(studentDiv);
+            })
+        }
+
+        document.getElementById("mark-attendance").addEventListener("click", mark)
+
+        async function mark() {
+            const date = document.getElementById("date").value;
+            const studentList = document.querySelectorAll(".student");
+            const list = document.getElementById('attendance-list');
+            list.innerHTML = '';
+            for(const student of studentList) {
+                const name = student.querySelector("label").textContent;
+                const presentRadio = student.querySelector("input[value='Present']");
+                const absentRadio = student.querySelector("input[value='Absent']");
+
+                let status
+                if (presentRadio.checked) status = 'present'
+                else status = 'absent'
+
+                const obj = {
+                    date,
+                    name,
+                    status
+                }
+                console.log(obj)
+
+                const addData = await axios.post('http://localhost:7000/mark-attendance', obj)
+                    .then(result => {
+                        console.log('in axios post')
+                        console.log(result.data)
+                        display(result.data)
+                    })
+                    .catch(err => console.log(err))
+                
+                student.removeChild(presentRadio);
+                student.removeChild(absentRadio);
+            }
+        }
+
+
+
+        function display(obj) {
+            
+            const status = obj.status
+            const list = document.getElementById('attendance-list')
+            const tick = document.createElement("span");
+
+            if (status == 'present') {
+                tick.className = "tick";
+                tick.textContent = "✔";
+                tick.style.color = "green";
+            } else if (status == 'absent') {
+                tick.className = "tick";
+                tick.textContent = "✘";
+                tick.style.color = "red";
+            }
+            const div = document.createElement("div")
+            const label = document.createElement("label");
+            label.textContent = obj.name;
+            div.appendChild(label);
+    
+            div.appendChild(tick);
+    
+            list.appendChild(div); 
+
+
+
+
+
+
+
+
+
+            // Remove the radio buttons after marking attendance
+
+        }
+
+
+
+    </script>
+</body>
+
+</html>
